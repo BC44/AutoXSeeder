@@ -75,7 +75,6 @@ def main():
 			except Exception:
 				pass
 		else:
-			n = 1
 			failedTotalSize = 0
 			matchedFiles = {}
 			isDisc = isDiscTorrent(torrentDataFileList)
