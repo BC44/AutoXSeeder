@@ -1,3 +1,5 @@
+#! Python 3.6
+
 from fuzzywuzzy import fuzz
 import json
 import os
