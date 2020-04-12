@@ -155,7 +155,7 @@ def findMatchingDownloadedFile(torrentDataRootName, torrentDataFilesize, torrent
 					if isDisc and areRootPathsSimilar(localFilePath, listingPath, torrentDataFilePath) and filename == torrentDataFilename:
 						if abs(localFilesize - torrentDataFilesize) <= MAX_FILESIZE_DIFFERENCE:
 							return localFilePath
-					elif re.search(SEASON_EP_RE, torrentDataFilePath, re.IGNORECASE):
+					elif re.search(SEASON_EP_RE, torrentDataFilePath, re.IGNORECASE) and fuzz.token_set_ratio(filename, torrentDataFilename) > 95:
 						season_ep_str_torrent = getSeasonEpisodeStr(torrentDataFilePath)
 						season_ep_str_filename = getSeasonEpisodeStr(filename)
 						if season_ep_str_torrent == season_ep_str_filename and abs(localFilesize - torrentDataFilesize) <= MAX_FILESIZE_DIFFERENCE:
