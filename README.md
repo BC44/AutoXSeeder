@@ -1,5 +1,5 @@
 # AutoXSeeder
-Parses torrent files and creates symlinks for matching local data
+Parses torrent files and creates symlinks for matching Movies and TV local data
 
 Requires [Torrent_Parser](https://pypi.org/project/torrent_parser/)
 
