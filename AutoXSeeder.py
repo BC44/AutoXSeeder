@@ -11,13 +11,13 @@ from ctypes import windll, wintypes
 # edit variables corresponding to your working environment
 
 # directory where the downloaded torrent files are located, to be parsed and find matching existing files
-TORRENTS_LOCATION = ''
+TORRENTS_LOCATION = r''
 
 # parent directory whose child files/folders will be used to conduct the search for cross-seedable content.
-TRACKER1_DATA_LOCATION = ''
+TRACKER1_DATA_LOCATION = r''
 
 # directory where torrent client for tracker #2 will store downloaded content, and as such, where matched cross-seedable content will be symlinked
-TRACKER2_DATA_LOCATION = ''
+TRACKER2_DATA_LOCATION = r''
 
 #############
 
