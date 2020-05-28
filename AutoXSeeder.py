@@ -1,6 +1,6 @@
 #! Python 3.6
 
-from fuzzywuzzy import fuzz
+from rapidfuzz import fuzz
 import json
 import os
 import re
@@ -137,14 +137,14 @@ def findMatchingDownloadedFile(torrentDataRootName, torrentDataFilesize, torrent
 		# if 'planet' in listing.lower():
 		# 	print(listing)
 		# 	print(fuzz.token_set_ratio(listing, torrentDataFilename))
-		if os.path.isfile(listingPath) and fuzz.token_set_ratio(listing, torrentDataFilename) > 80:
+		if os.path.isfile(listingPath) and fuzz.token_set_ratio(listing, torrentDataFilename, score_cutoff=80):
 			localFilesize = get_file_size(listingPath)
 			# print((localFilesize - torrentDataFilesize)/1000000)
 			if localFilesize == None:
 				return None
 			if abs(localFilesize - torrentDataFilesize) <= MAX_FILESIZE_DIFFERENCE:
 				return listingPath
-		elif fuzz.token_set_ratio(listing, torrentDataRootName) > 85:
+		elif fuzz.token_set_ratio(listing, torrentDataRootName, score_cutoff=85):
 			for root, dirs, filenames in os.walk(listingPath):
 				for filename in filenames:
 					localFilePath = os.path.join(root, filename)
@@ -155,12 +155,12 @@ def findMatchingDownloadedFile(torrentDataRootName, torrentDataFilesize, torrent
 					if isDisc and areRootPathsSimilar(localFilePath, listingPath, torrentDataFilePath) and filename == torrentDataFilename:
 						if abs(localFilesize - torrentDataFilesize) <= MAX_FILESIZE_DIFFERENCE:
 							return localFilePath
-					elif re.search(SEASON_EP_RE, torrentDataFilePath, re.IGNORECASE) and fuzz.token_set_ratio(filename, torrentDataFilename) > 95:
+					elif re.search(SEASON_EP_RE, torrentDataFilePath, re.IGNORECASE) and fuzz.token_set_ratio(filename, torrentDataFilename, score_cutoff=95):
 						season_ep_str_torrent = getSeasonEpisodeStr(torrentDataFilePath)
 						season_ep_str_filename = getSeasonEpisodeStr(filename)
 						if season_ep_str_torrent == season_ep_str_filename and abs(localFilesize - torrentDataFilesize) <= MAX_FILESIZE_DIFFERENCE:
 							return localFilePath
-					elif fuzz.token_set_ratio(filename, torrentDataFilename) > 95:
+					elif fuzz.token_set_ratio(filename, torrentDataFilename, score_cutoff=95):
 						if abs(localFilesize - torrentDataFilesize) <= MAX_FILESIZE_DIFFERENCE:
 							return localFilePath
 	return None
