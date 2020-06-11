@@ -3,7 +3,7 @@ Parses torrent files and creates symlinks for matching Movies and TV local data
 
 Set directories corresponding to your working environment inside `AutoXSeeder.py`
 
-This script is intended to be used in a Windows environment
+This script is intended to be used in a Windows environment. Check out [Autotorrent](https://github.com/JohnDoee/autotorrent) for Linux/MacOS usage.
 
 # Setup
 
