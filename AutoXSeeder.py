@@ -1,9 +1,10 @@
 #!python3
 
-from rapidfuzz import fuzz
+import argparse
 import json
 import os
 import re
+from rapidfuzz import fuzz
 import torrent_parser as tp
 
 ###########
@@ -19,6 +20,10 @@ TRACKER1_DATA_LOCATION = r''
 TRACKER2_DATA_LOCATION = r''
 
 #############
+
+parser.add_argument('-i', metavar='INPUT_PATH', dest='INPUT_PATH', type=str, required=True, help='Torrent file or directory containing torrent files')
+parser.add_argument('-r', metavar='ROOT_FOLDER', dest='ROOT_FOLDER', type=str, required=True, help='Root folder containing downloaded content (eg. your torrent client download directory)')
+parser.add_argument('-s', metavar='SAVE_PATH', dest='SAVE_PATH', type=str, required=True, help='Root folder where symlinks will be created (eg. your torrent client download directory')
 
 
 DISC_FOLDERS = ['BDMV', 'CERTIFICATE', 'PLAYLIST', 'STREAM', 'VIDEO_TS', 'AUDIO_TS']
