@@ -7,24 +7,11 @@ import re
 from rapidfuzz import fuzz
 import torrent_parser as tp
 
-###########
-# edit variables corresponding to your working environment
-
-# directory where the downloaded torrent files are located, to be parsed and find matching existing files
-TORRENTS_LOCATION = r''
-
-# parent directory whose child files/folders will be used to conduct the search for cross-seedable content.
-TRACKER1_DATA_LOCATION = r''
-
-# directory where torrent client for tracker #2 will store downloaded content, and as such, where matched cross-seedable content will be symlinked
-TRACKER2_DATA_LOCATION = r''
-
-#############
-
+parser = argparse.ArgumentParser(description='Creates symlinks for existing data given torrent file(s) as inputs')
 parser.add_argument('-i', metavar='INPUT_PATH', dest='INPUT_PATH', type=str, required=True, help='Torrent file or directory containing torrent files')
-parser.add_argument('-r', metavar='ROOT_FOLDER', dest='ROOT_FOLDER', type=str, required=True, help='Root folder containing downloaded content (eg. your torrent client download directory)')
-parser.add_argument('-s', metavar='SAVE_PATH', dest='SAVE_PATH', type=str, required=True, help='Root folder where symlinks will be created (eg. your torrent client download directory')
-
+parser.add_argument('-r', metavar='ROOT_PATH', dest='ROOT_PATH', type=str, required=True, help='Root folder (eg. your torrent client download directory) containing downloaded content which will be checked for cross-seedable files')
+parser.add_argument('-s', metavar='SAVE_PATH', dest='SAVE_PATH', type=str, required=True, help='Root folder (eg. your torrent client download directory) where symlinks will be created')
+args = parser.parse_args()
 
 DISC_FOLDERS = ['BDMV', 'CERTIFICATE', 'PLAYLIST', 'STREAM', 'VIDEO_TS', 'AUDIO_TS']
 SEASON_EP_RE = r's(\d+)[ \.]?e(\d+)\b|\b(\d+) ?x ?(\d+)\b'
@@ -38,21 +25,18 @@ if os.name == 'nt':
 
 
 def main():
-    if not os.path.isdir(os.path.join(TORRENTS_LOCATION, 'matched')):
-        os.mkdir(os.path.join(TORRENTS_LOCATION, 'matched'))
+    torrentFiles = [os.path.normpath(args.INPUT_PATH)] if args.INPUT_PATH.endswith('.torrent') else [os.path.join(args.INPUT_PATH, f) for f in os.listdir(args.INPUT_PATH)]
 
-    for torrent in os.listdir(TORRENTS_LOCATION):
+    for torrentPath in torrentFiles:
+        torrent = os.path.basename(torrentPath)
         if not torrent.endswith('.torrent'):
             continue
-        torrentPath = os.path.join(TORRENTS_LOCATION, torrent)
+
         try:
             torrentData = tp.parse_torrent_file(torrentPath)
         except Exception:
-            badTorrentDir = os.path.join(TORRENTS_LOCATION, 'bad_torrents')
-            if not os.path.isdir(badTorrentDir): os.mkdir(badTorrentDir)
-            badtorrentPath = os.path.join(badTorrentDir, torrent)
-            badtorrentPath = validatePath(badtorrentPath)
-            os.rename(torrentPath, badtorrentPath)
+            print(f'Error reading torrent file {torrentPath}')
+            continue
 
 
         torrentDataRootName = torrentData['info']['name']
@@ -65,7 +49,7 @@ def main():
             if matchedFilepath == None:
                 continue
 
-            linkPath = os.path.join(TRACKER2_DATA_LOCATION, torrentDataRootName)
+            linkPath = os.path.join(args.SAVE_PATH, torrentDataRootName)
             targetPath = matchedFilepath
 
             if islink(targetPath):
@@ -80,10 +64,10 @@ def main():
                 print('Admin privileges not held. Cannot create symlink.')
                 exit()
 
-            try:
-                os.rename(torrentPath, os.path.join(os.path.join(TORRENTS_LOCATION, 'matched'), torrent))
-            except Exception:
-                pass
+            # try:
+            #     os.rename(torrentPath, os.path.join(os.path.join(TORRENTS_LOCATION, 'matched'), torrent))
+            # except Exception:
+            #     pass
         else:
             failedTotalSize = 0
             matchedFiles = {}
@@ -106,7 +90,7 @@ def main():
                 if dirname == '':
                     continue
 
-                dirPath = os.path.join(TRACKER2_DATA_LOCATION, dirname)
+                dirPath = os.path.join(args.SAVE_PATH, dirname)
                 try:
                     os.makedirs(dirPath)
                 except FileExistsError:
@@ -115,7 +99,7 @@ def main():
                 targetPath = matchedFiles[filepath]
                 if islink(targetPath):
                     targetPath = os.readlink(targetPath)
-                linkPath = os.path.join(TRACKER2_DATA_LOCATION, filepath)
+                linkPath = os.path.join(args.SAVE_PATH, filepath)
 
                 print(f'Symlinking {i + 1} of {len(matchedFiles)}: {linkPath}')
                 try:
@@ -127,11 +111,11 @@ def main():
                     print('Admin privileges not held. Cannot create symlink.')
                     exit()
 
-            if matchedFiles:
-                try:
-                    os.rename(torrentPath, os.path.join(os.path.join(TORRENTS_LOCATION, 'matched'), torrent))
-                except:
-                    pass
+            # if matchedFiles:
+            #     try:
+            #         os.rename(torrentPath, os.path.join(os.path.join(TORRENTS_LOCATION, 'matched'), torrent))
+            #     except:
+            #         pass
 
 
 def findMatchingDownloadedFile(torrentDataRootName, torrentDataFilesize, torrentDataFilePath, isDisc=False, isTV=False):
@@ -141,9 +125,9 @@ def findMatchingDownloadedFile(torrentDataRootName, torrentDataFilesize, torrent
     if isTV or torrentDataFilesize < 100 * 1000000:
         MAX_FILESIZE_DIFFERENCE = 0
 
-    listings = os.listdir(TRACKER1_DATA_LOCATION)
+    listings = os.listdir(args.ROOT_PATH)
     for listing in listings:
-        listingPath = os.path.join(TRACKER1_DATA_LOCATION, listing)
+        listingPath = os.path.join(args.ROOT_PATH, listing)
         # if 'planet' in listing.lower():
         # 	print(listing)
         # 	print(fuzz.token_set_ratio(listing, torrentDataFilename))
