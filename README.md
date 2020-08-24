@@ -5,7 +5,7 @@ This script is intended to be used in a Windows environment. Check out [Autotorr
 
 # Setup
 
-Run `pip install -r requirements.txt` to install the required libraries
+Run `pip3 install -r requirements.txt` to install the required libraries
 
 # Usage
 
